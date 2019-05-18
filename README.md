@@ -1,5 +1,5 @@
 # RadioControlProtocolPy
-Implementation of ToolboxPlane/RadioControlProtocol in Python 3
+Implementation of [ToolboxPlane/RadioControlProtocol](https://github.com/ToolboxPlane/RadioControlProtocol) in Python 3
 
 ## How to use
 Run the setup.py script to compile the library:
