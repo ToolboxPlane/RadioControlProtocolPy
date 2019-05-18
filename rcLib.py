@@ -67,7 +67,7 @@ class Package:
     def encode(self):
         res_bits = math.log2(self.resolution)
         data_size = math.ceil((res_bits * self.channel_count) / 8)
-        package_len = data_size + 5
+        package_len = data_size + 6
         if self.mesh:
             package_len += 1
 
@@ -117,7 +117,6 @@ class Package:
             self.resolution = Package.__key_to_resolution_steps[data & 0b111]
             self.channel_count = Package.__key_to_channel_count[(data & 0b111000) >> 3]
             self.channel_data = [0] * self.channel_count
-
             self.__receive_state = 4 if data & (1 << 7) else 5
         elif self.__receive_state == 4:  # Mesh
             self.routing_len = data & 0b1111
@@ -129,7 +128,7 @@ class Package:
             data_size = math.ceil((res_bits * self.channel_count)/8)
             for c in range(0, 8):
                 bit = int((self.__data_byte_count * 8 + c) % res_bits)
-                self.channel_data[int((self.__data_byte_count * 8 + c) / res_bits)] |= ((data >> c) & 1) << bit
+                self.channel_data[int((self.__data_byte_count * 8 + c) // res_bits)] |= ((data >> c) & 1) << bit
 
             self.__data_byte_count += 1
             if self.__data_byte_count >= data_size:
