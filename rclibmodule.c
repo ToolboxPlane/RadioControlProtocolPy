@@ -25,8 +25,19 @@ static PyObject* rclib_encode(RcLibObject *self, PyObject *value, void *closure)
     return Py_BuildValue("y#", self->pkg.buffer, len);
 }
 
+static PyObject* rclib_decode(RcLibObject *self, PyObject *args, void *closure) {
+    uint8_t byte;
+    if (!PyArg_ParseTuple(args, "b", &byte)) {
+        return NULL;
+    }
+
+    bool result = rc_lib_decode(&self->pkg, byte);
+    return Py_BuildValue("p", result);
+}
+
 static PyMethodDef methods[] = {
         {"encode", (PyCFunction) rclib_encode, METH_NOARGS, "Serialize the data"},
+        {"decode", (PyCFunction) rclib_decode, METH_VARARGS, "Serialize the data"},
         {NULL}  /* Sentinel */
 };
 
