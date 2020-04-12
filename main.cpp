@@ -1,35 +1,39 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-int add(int i, int j) {
-    return i + j;
-}
+#include "RadioControlProtocolCpp/rcLib.hpp"
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(cmake_example, m) {
-    m.doc() = R"pbdoc(
-        Pybind11 example plugin
-        -----------------------
-        .. currentmodule:: cmake_example
-        .. autosummary::
-           :toctree: _generate
-           add
-           subtract
-    )pbdoc";
+#define NAMEOF(x) #x
+#define FUNC(x) NAMEOF(x), &rcLib::Package::x
 
-    m.def("add", &add, R"pbdoc(
-        Add two numbers
-        Some other explanation about the add function.
-    )pbdoc");
 
-    m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-        Subtract two numbers
-        Some other explanation about the subtract function.
-    )pbdoc");
+auto encodeWrapper(rcLib::Package &pkg) -> std::vector<uint8_t> {
+    return {pkg.getEncodedData(), pkg.getEncodedData() + pkg.encode()};
+}
 
-#ifdef VERSION_INFO
-    m.attr("__version__") = VERSION_INFO;
-#else
-    m.attr("__version__") = "dev";
-#endif
+PYBIND11_MODULE(rc_lib, m) {
+    py::class_<rcLib::Package>(m, NAMEOF(Package))
+        .def(py::init<>())
+        .def(py::init<uint16_t, uint8_t>())
+        .def(FUNC(decode))
+        .def(NAMEOF(encode), encodeWrapper)
+        .def(FUNC(setChannel))
+        .def(FUNC(getChannel))
+        .def(FUNC(getChannelCount))
+        .def(FUNC(getResolution))
+        .def(FUNC(getDeviceId))
+        .def(FUNC(setDeviceId))
+        .def(FUNC(isChecksumCorrect))
+        .def(FUNC(isMesh))
+        .def(FUNC(setMeshProperties))
+        .def(FUNC(needsForwarding))
+        .def(FUNC(countNode))
+        .def(FUNC(isDiscoverMessage))
+        .def(FUNC(isDiscoverResponse))
+        .def(FUNC(setDiscoverMessage))
+        .def(FUNC(makeDiscoverResponse));
+    m.def(FUNC(setTransmitterId));
+    m.def(FUNC(getTransmitterId));
 }
